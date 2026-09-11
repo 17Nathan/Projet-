@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pilotage Dropshipping</title>
+<style>
+:root{
+  --bg:#0a0a0a; --surface:#131313; --surface-2:#1a1a1a;
+  --border:#2a2a2a; --border-strong:#3a3a3a;
+  --text:#f2f0ec; --text-2:#a8a49c; --text-3:#6e6a62;
+  --accent:#ff8a2b; --accent-2:#ffab5e; --accent-text:#0a0a0a;
+  --blue:#4f8fdb; --danger:#e0604a; --success:#6fbf5f;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+.app{max-width:1080px;margin:0 auto;padding:16px 16px 90px;}
+h1{font-size:20px;font-weight:600;margin:4px 0 2px;}
+.sub{color:var(--text-3);font-size:13px;margin:0 0 16px;}
+.hidden{display:none !important;}
+nav.topnav{display:none;}
+nav.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;overflow-x:auto;padding:6px 2px calc(6px + env(safe-area-inset-bottom));z-index:50;}
+nav.bottomnav button{flex:1 0 14%;min-width:56px;background:none;border:none;color:var(--text-3);font-size:10px;padding:6px 2px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;}
+nav.bottomnav button svg{width:18px;height:18px;stroke:var(--text-3);}
+nav.bottomnav button.active{color:var(--accent);}
+nav.bottomnav button.active svg{stroke:var(--accent);}
+@media(min-width:820px){
+  .app{padding:24px 32px 40px;}
+  nav.bottomnav{display:none;}
+  nav.topnav{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  nav.topnav button{background:none;border:none;color:var(--text-3);font-family:inherit;font-size:14px;padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;}
+  nav.topnav button.active{color:var(--text);border-bottom-color:var(--accent);}
+}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(min-width:640px){.grid4{grid-template-columns:repeat(4,1fr);}}
+.metric{background:var(--surface-2);border-radius:var(--radius);padding:12px 14px;}
+.metric .label{font-size:12px;color:var(--text-3);margin-bottom:4px;}
+.metric .val{font-size:20px;font-weight:600;}
+section.tab{display:none;}
+section.tab.active{display:block;}
+label{display:block;font-size:12px;color:var(--text-2);margin:10px 0 4px;}
+input,select,textarea{width:100%;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+.row{display:flex;gap:8px;flex-wrap:wrap;}
+.row > *{flex:1;min-width:120px;}
+button.btn{background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);border-radius:8px;padding:9px 14px;font-size:13px;font-family:inherit;cursor:pointer;}
+button.btn:active{transform:scale(0.98);}
+button.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;}
+button.btn.danger{color:var(--danger);border-color:var(--danger);background:transparent;}
+button.btn.small{padding:5px 10px;font-size:12px;}
+button.btn:disabled{opacity:0.4;}
+.btnrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.item{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;background:var(--surface);}
+.item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.item-title{font-weight:600;font-size:14px;}
+.item-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--border-strong);color:var(--text-2);white-space:nowrap;}
+.badge.b-orange{color:var(--accent-2);border-color:#4a3016;background:#241708;}
+.badge.b-blue{color:#a7c6ea;border-color:#213a52;background:#0f1c28;}
+.badge.b-green{color:var(--success);border-color:#2b4a2b;background:#132416;}
+.badge.b-red{color:var(--danger);border-color:#4a2620;background:#241109;}
+.badge.b-gray{color:var(--text-3);}
+.item-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.empty{color:var(--text-3);font-size:13px;text-align:center;padding:30px 10px;}
+.filters{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;}
+.chip{flex-shrink:0;font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border-strong);color:var(--text-2);cursor:pointer;background:none;font-family:inherit;}
+.chip.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.calday{background:var(--surface-2);border-radius:8px;padding:6px 4px;min-height:70px;}
+.calday .d{font-size:11px;color:var(--text-3);margin-bottom:4px;text-align:center;}
+.caldot{font-size:10px;background:var(--border-strong);color:var(--text);border-radius:5px;padding:2px 4px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.calnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+h2.sectiontitle{font-size:15px;font-weight:600;margin:22px 0 10px;color:var(--text-2);}
+h2.sectiontitle:first-child{margin-top:0;}
+.hintbox{font-size:12px;color:var(--text-3);background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-bottom:14px;flex:1;}
+.savehint{font-size:11px;color:var(--text-3);text-align:center;margin-top:6px;}
+.money-pos{color:var(--success);}
+.money-neg{color:var(--danger);}
+.vdot{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface-2);margin-right:4px;}
+.vdot .sq{width:7px;height:7px;border-radius:2px;display:inline-block;}
+.timerbig{font-size:40px;font-weight:600;text-align:center;margin:10px 0;font-variant-numeric:tabular-nums;}
+.tophead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.bellbtn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface-2);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.bellbtn svg{width:18px;height:18px;stroke:var(--text-3);}
+.bellbtn.on svg{stroke:var(--accent);}
+.editbox{background:var(--surface-2);border-radius:8px;padding:10px;margin-top:8px;}
+.lockscreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.lockscreen h2{font-size:18px;margin:0 0 4px;}
+.lockscreen p{color:var(--text-3);font-size:13px;margin:0 0 20px;text-align:center;}
+.pindots{display:flex;gap:14px;margin-bottom:20px;}
+.pindots span{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-strong);background:transparent;}
+.pindots span.filled{background:var(--accent);border-color:var(--accent);}
+.pinkeys{display:grid;grid-template-columns:repeat(3,64px);gap:14px;}
+.pinkeys button{width:64px;height:64px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);font-size:20px;font-family:inherit;}
+.pinkeys button:active{background:var(--border-strong);}
+.pinerror{color:var(--danger);font-size:13px;height:18px;margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="lockscreen" id="lockscreen">
+  <h2>Pilotage boutiques</h2>
+  <p>Entre le code à 4 chiffres</p>
+  <div class="pindots" id="pindots">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="pinkeys">
+    <button onclick="pinPress('1')">1</button><button onclick="pinPress('2')">2</button><button onclick="pinPress('3')">3</button>
+    <button onclick="pinPress('4')">4</button><button onclick="pinPress('5')">5</button><button onclick="pinPress('6')">6</button>
+    <button onclick="pinPress('7')">7</button><button onclick="pinPress('8')">8</button><button onclick="pinPress('9')">9</button>
+    <button onclick="pinClear()">✕</button><button onclick="pinPress('0')">0</button><button onclick="pinBackspace()">⌫</button>
+  </div>
+  <div class="pinerror" id="pinerror"></div>
+</div>
+<div class="lockscreen" id="loginscreen" style="display:none">
+  <h2>Connexion</h2>
+  <p>Connecte-toi pour accéder à tes données</p>
+  <input id="login-email" type="email" placeholder="Email" style="max-width:280px;margin-bottom:10px">
+  <input id="login-password" type="password" placeholder="Mot de passe" style="max-width:280px;margin-bottom:14px">
+  <button class="btn primary" style="max-width:280px;width:100%" onclick="doLogin()">Se connecter</button>
+  <div class="pinerror" id="loginerror"></div>
+</div>
+<div class="app" id="mainapp" style="display:none">
+  <h1>Pilotage boutiques</h1>
+  <p class="sub">Boutiques, produits, contenu, comptes, finance et temps de travail.</p>
+
+  <nav class="topnav">
+    <button data-tab="shops" class="active">Boutiques</button>
+    <button data-tab="products">Produits</button>
+    <button data-tab="videos">Vidéos</button>
+    <button data-tab="calendar">Calendrier</button>
+    <button data-tab="accounts">Comptes</button>
+    <button data-tab="finance">Finance</button>
+    <button data-tab="work">Work</button>
+    <button data-tab="clips">Clips</button>
+  </nav>
+
+  <!-- BOUTIQUES -->
+  <section class="tab active" id="tab-shops">
+    <div class="grid4" id="s-totals"></div>
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Nouvelle boutique</h2>
+      <div class="row">
+        <div><label>Nom boutique</label><input id="s-name" placeholder="ex: ColdPaws US"></div>
+        <div><label>Marché</label><select id="s-market"><option value="US">US</option><option value="FR">FR</option></select></div>
+      </div>
+      <label>Produit</label>
+      <select id="s-product" onchange="toggleShopProductOther('s-product','s-product-other')"></select>
+      <input id="s-product-other" class="hidden" placeholder="Nom du produit" style="margin-top:8px">
+      <div class="row" style="margin-top:8px">
+        <div><label>Prix de vente / unité (€)</label><input id="s-price" type="number" step="0.01" placeholder="39.90"></div>
+        <div><label>Coût produit / unité (€)</label><input id="s-cost" type="number" step="0.01" placeholder="12.50"></div>
+      </div>
+      <div class="btnrow"><button class="btn primary" onclick="addShop()">Ajouter la boutique</button></div>
+    </div>
+    <div id="s-list"></div>
+  </section>
+
+  <!-- PRODUITS -->
+  <section class="tab" id="tab-products">
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Nouveau produit</h2>
+      <div class="row">
+        <div><label>Nom du produit</label><input id="p-name" placeholder="ex: Panier chien traîneau"></div>
+        <div><label>Marché visé</label><select id="p-market"><option value="US">US</option><option value="FR">FR</option><option value="US/FR">US + FR</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Fournisseur</label><input id="p-supplier" placeholder="ex: CJ Dropshipping"></div>
+        <label style="flex:1;min-width:120px">Statut
+          <select id="p-status">
+            <option value="neutre">Neutre (rien fait, pas prévu)</option>
+            <option value="alancer">À lancer</option>
+            <option value="essaye">Essayé</option>
+            <option value="lance">Lancé</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <div><label>Délai de livraison</label><input id="p-delivery" placeholder="ex: 10-15 jours"></div>
+        <div><label>MOQ (quantité minimum)</label><input id="p-moq" type="number" placeholder="ex: 50 (laisser vide si inconnu)"></div>
+      </div>
+      <label>Notes</label>
+      <textarea id="p-notes" rows="2" placeholder="Marge visée, remarques..."></textarea>
+      <div class="btnrow"><button class="btn primary" onclick="addProduct()">Ajouter le produit</button></div>
+    </div>
+    <div class="filters" id="p-filters"></div>
+    <div id="p-list"></div>
+  </section>
+
+  <!-- VIDEOS -->
+  <section class="tab" id="tab-videos">
+    <div class="tophead">
+      <div class="hintbox">Pipeline de contenu. 🟠 à faire · 🔵 faite · 🟢 publiée · 🔴 heure dépassée sans publication.</div>
+      <button class="bellbtn" id="notif-bell" onclick="requestNotifPermission()" title="Alertes de publication">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+    </div>
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Nouvelle vidéo</h2>
+      <div class="row">
+        <div><label>Marché</label><select id="v-market"><option value="US">US</option><option value="FR">FR</option></select></div>
+        <div><label>Boutique</label><select id="v-shop"><option value="">— aucune —</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Compte Instagram</label><input id="v-account" placeholder="ex: @coldpaws.us"></div>
+        <div><label>Produit</label><input id="v-product" placeholder="ex: Panier chien traîneau"></div>
+      </div>
+      <div class="row">
+        <div><label>Date de publication</label><input id="v-date" type="date"></div>
+        <div><label>Heure prévue</label><input id="v-time" type="time"></div>
+      </div>
+      <label>Statut</label>
+      <select id="v-status">
+        <option value="script">À faire (script)</option>
+        <option value="video">Faite (vidéo IA prête)</option>
+        <option value="trad">Faite (traduite)</option>
+        <option value="prog">Faite (programmée)</option>
+        <option value="pub">Publiée</option>
+      </select>
+      <div class="btnrow"><button class="btn primary" onclick="addVideo()">Ajouter</button></div>
+    </div>
+    <div class="filters" id="v-filters"></div>
+    <div id="v-list"></div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="tab" id="tab-calendar">
+    <div class="card">
+      <div class="calnav">
+        <button class="btn small" onclick="shiftWeek(-1)">‹ Sem. préc.</button>
+        <span id="cal-label" style="font-size:13px;color:var(--text-2)"></span>
+        <button class="btn small" onclick="shiftWeek(1)">Sem. suiv. ›</button>
+      </div>
+      <div class="calgrid" id="calgrid"></div>
+    </div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section class="tab" id="tab-accounts">
+    <div class="hintbox" style="margin-bottom:14px">Identifiants de connexion (Shopify, Instagram...) par boutique. Le mot de passe reste dans ton app Notes.</div>
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Nouveau compte</h2>
+      <label>Boutique</label>
+      <select id="a-shop"><option value="">— sélectionner une boutique —</option></select>
+      <div class="row">
+        <div><label>Plateforme</label><select id="a-platform"><option>Shopify</option><option>Instagram</option><option>TikTok</option><option>Autre</option></select></div>
+        <div><label>Email</label><input id="a-email" placeholder="contact@boutique.com"></div>
+      </div>
+      <label>Nom d'utilisateur</label>
+      <input id="a-username" placeholder="ex: coldpaws.us">
+      <div class="btnrow"><button class="btn primary" onclick="addAccount()">Ajouter</button></div>
+    </div>
+    <div id="a-list"></div>
+  </section>
+
+  <!-- FINANCE -->
+  <section class="tab" id="tab-finance">
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Budgets</h2>
+      <div class="row">
+        <div><label>Budget global (plafond total)</label><input id="f-globalbudget" type="number" step="0.01" placeholder="ex: 3000"></div>
+        <div><label>Budget mensuel</label><input id="f-monthlybudget" type="number" step="0.01" placeholder="ex: 200"></div>
+      </div>
+      <div class="btnrow"><button class="btn primary" onclick="saveBudgets()">Enregistrer les budgets</button></div>
+    </div>
+    <div class="grid4">
+      <div class="metric"><div class="label">Dépenses ponctuelles</div><div class="val" id="f-onetime-total">0 €</div></div>
+      <div class="metric"><div class="label">Reste sur budget global</div><div class="val" id="f-global-rest">0 €</div></div>
+      <div class="metric"><div class="label">Abonnements / mois</div><div class="val" id="f-monthly-total">0 €</div></div>
+      <div class="metric"><div class="label">Reste sur budget mensuel</div><div class="val" id="f-monthly-rest">0 €</div></div>
+    </div>
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Ajouter une dépense</h2>
+      <div class="row">
+        <div><label>Nom</label><input id="f-name" placeholder="ex: Formation, Claude, Higsfield"></div>
+        <div><label>Montant (€)</label><input id="f-amount" type="number" step="0.01" placeholder="ex: 20"></div>
+      </div>
+      <label>Type</label>
+      <select id="f-type"><option value="once">Ponctuel (budget global)</option><option value="monthly">Abonnement mensuel (budget mensuel)</option></select>
+      <div class="btnrow"><button class="btn primary" onclick="addExpense()">Ajouter la dépense</button></div>
+    </div>
+    <div id="f-list"></div>
+  </section>
+
+  <!-- WORK -->
+  <section class="tab" id="tab-work">
+    <div class="card">
+      <div class="timerbig" id="w-display">00:00:00</div>
+      <div class="btnrow" style="justify-content:center" id="w-controls"></div>
+    </div>
+    <h2 class="sectiontitle">Historique</h2>
+    <div id="w-history"></div>
+  </section>
+
+  <!-- CLIPS -->
+  <section class="tab" id="tab-clips">
+    <div class="card">
+      <h2 class="sectiontitle" style="margin-top:0">Nouveau clip</h2>
+      <label>Titre / description</label>
+      <input id="c-title" placeholder="ex: Réaction LaSalle trailer GTA 6 - partie 2">
+      <div class="row" style="margin-top:8px">
+        <div><label>Source (créateur à créditer, facultatif)</label><input id="c-source" placeholder="ex: @LaSalle"></div>
+        <div><label>Partie (si découpé)</label><input id="c-part" placeholder="ex: 1/3"></div>
+      </div>
+      <div class="row">
+        <div><label>Date de publication</label><input id="c-date" type="date"></div>
+        <div><label>Heure prévue</label><input id="c-time" type="time"></div>
+      </div>
+      <label>Statut</label>
+      <select id="c-status">
+        <option value="idee">À faire</option>
+        <option value="monte">Montée (prête)</option>
+        <option value="programme">Programmée</option>
+        <option value="publie">Publiée</option>
+      </select>
+      <div class="btnrow"><button class="btn primary" onclick="addClip()">Ajouter</button></div>
+    </div>
+    <div id="c-list"></div>
+  </section>
+
+  <div class="card">
+    <h2 class="sectiontitle" style="margin-top:0">Sauvegarde</h2>
+    <p class="item-sub" style="margin-bottom:10px">Les données restent sur cet appareil et ce navigateur. Pour les retrouver ailleurs, exporte puis importe le fichier.</p>
+    <div class="btnrow">
+      <button class="btn" onclick="exportData()">Exporter mes données</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">Importer un fichier</button>
+      <input type="file" id="importFile" accept="application/json" class="hidden" onchange="importData(event)">
+    </div>
+  </div>
+  <p class="savehint">Enregistré automatiquement dans ce navigateur.</p>
+</div>
+
+<nav class="bottomnav">
+  <button data-tab="shops" class="active"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 21v-6h6v6"/></svg>Boutiques</button>
+  <button data-tab="products"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>Produits</button>
+  <button data-tab="videos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M22 8l-6 4 6 4V8z"/></svg>Vidéos</button>
+  <button data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendrier</button>
+  <button data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Comptes</button>
+  <button data-tab="finance"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Finance</button>
+  <button data-tab="work"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Work</button>
+  <button data-tab="clips"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l16-3 1 4-16 3z"/><rect x="3" y="9" width="18" height="12" rx="2"/></svg>Clips</button>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const APP_PIN = '7575';
+let pinBuffer = '';
+let pinPassed = false;
+let authUser = null;
+let firebaseAvailable = true;
+function renderPinDots(){
+  document.querySelectorAll('#pindots span').forEach((el,i)=>el.classList.toggle('filled', i<pinBuffer.length));
+}
+function pinPress(d){
+  if(pinBuffer.length>=4) return;
+  pinBuffer += d;
+  renderPinDots();
+  document.getElementById('pinerror').textContent='';
+  if(pinBuffer.length===4){
+    if(pinBuffer===APP_PIN){
+      sessionStorage.setItem('app_unlocked','true');
+      pinPassed = true;
+      maybeProceed();
+    } else {
+      document.getElementById('pinerror').textContent='Code incorrect';
+      setTimeout(()=>{ pinBuffer=''; renderPinDots(); }, 400);
+    }
+  }
+}
+function pinClear(){ pinBuffer=''; renderPinDots(); document.getElementById('pinerror').textContent=''; }
+function pinBackspace(){ pinBuffer=pinBuffer.slice(0,-1); renderPinDots(); }
+function doLogin(){
+  if(!firebaseAvailable){ document.getElementById('loginerror').textContent="Firebase n'a pas pu se charger, impossible de se connecter."; return; }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  document.getElementById('loginerror').textContent='';
+  if(!email || !password){ document.getElementById('loginerror').textContent='Renseigne email et mot de passe.'; return; }
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(function(err){
+    document.getElementById('loginerror').textContent = 'Connexion refusée : email ou mot de passe incorrect.';
+  });
+}
+function maybeProceed(){
+  if(!pinPassed) return;
+  if(!firebaseAvailable){
+    document.getElementById('lockscreen').style.display='none';
+    document.getElementById('loginscreen').style.display='flex';
+    document.getElementById('loginerror').textContent="Firebase n'a pas pu se charger (bloqueur de pub, ou pas de connexion internet). Recharge la page après avoir vérifié.";
+    return;
+  }
+  document.getElementById('lockscreen').style.display='none';
+  if(authUser){
+    document.getElementById('loginscreen').style.display='none';
+    document.getElementById('mainapp').style.display='';
+    initFirebaseApp();
+  } else {
+    document.getElementById('loginscreen').style.display='flex';
+  }
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDB_qxi4krthFq8qmv6kvQgqzKOqHM_-hk",
+  authDomain: "pilotage-dropshipping.firebaseapp.com",
+  projectId: "pilotage-dropshipping",
+  storageBucket: "pilotage-dropshipping.firebasestorage.app",
+  messagingSenderId: "653586668480",
+  appId: "1:653586668480:web:1938315167006decdf8625",
+  measurementId: "G-20SF0YE20Q"
+};
+try{
+  firebase.initializeApp(firebaseConfig);
+}catch(e){
+  firebaseAvailable = false;
+  console.error('Firebase init failed', e);
+}
+
+let state = {
+  shops: [], products: [], videos: [], accounts: [],
+  finance: { expenses: [], globalBudget: 0, monthlyBudget: 0 },
+  work: { running:false, startTs:null, accumulated:0, history:[] },
+  clips: []
+};
+let weekOffset = 0;
+let videoFilter = 'all';
+let productFilter = 'all';
+let workTickHandle = null;
+let editingShopId = null;
+let editingProductId = null;
+
+let db, userDocRef, firebaseReady = false;
+function initFirebaseApp(){
+  if(firebaseReady) return;
+  db = firebase.firestore();
+  const uid = firebase.auth().currentUser.uid;
+  userDocRef = db.collection('users').doc(uid);
+  userDocRef.onSnapshot(function(doc){
+    const defaults = {shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[]};
+    if(doc.exists){
+      const data = doc.data();
+      state = Object.assign(defaults, data);
+      state.work = Object.assign({running:false,startTs:null,accumulated:0,history:[]}, data.work||{});
+    } else {
+      state = defaults;
+    }
+    renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips();
+    if(state.work.running) startWorkTicker();
+    updateBellIcon();
+  }, function(err){ console.error('Firestore read error', err); });
+  firebaseReady = true;
+}
+function persist(){
+  if(!userDocRef) return;
+  userDocRef.set(state).catch(function(e){ console.error('save failed', e); });
+}
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function euro(n){ return (Math.round((n||0)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'; }
+function euroSpan(n){ const v=n||0; return `<span class="${v<0?'money-neg':'money-pos'}">${euro(v)}</span>`; }
+function esc(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]||c)); }
+function formatDate(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}); }
+
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const tab = b.dataset.tab;
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll(`nav button[data-tab="${tab}"]`).forEach(x=>x.classList.add('active'));
+    document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+  });
+});
+
+/* ---------- NOTIFICATIONS ---------- */
+function updateBellIcon(){
+  const bell = document.getElementById('notif-bell');
+  const supported = 'Notification' in window;
+  bell.classList.toggle('on', supported && Notification.permission==='granted');
+}
+function requestNotifPermission(){
+  if(!('Notification' in window)){
+    alert("Les notifications ne fonctionnent pas dans ce navigateur en navigation normale (limite d'Apple sur Safari iPhone). Elles marchent sur ordinateur, ou sur iPhone si tu ajoutes cette page à l'écran d'accueil (iOS 16.4+). Pour une alerte fiable même app fermée, il faudra brancher Firebase.");
+    return;
+  }
+  if(Notification.permission==='granted'){ updateBellIcon(); return; }
+  if(Notification.permission==='denied'){
+    alert("Les notifications sont bloquées pour cette page dans les réglages de ton navigateur. Autorise-les manuellement puis recharge la page.");
+    return;
+  }
+  Notification.requestPermission().then(p=>{ updateBellIcon(); });
+}
+function checkVideoAlerts(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const now = Date.now();
+  let changed=false;
+  state.videos.forEach(v=>{
+    if(v.status==='pub' || !v.date || !v.time || v.notified) return;
+    const dt = new Date(v.date+'T'+v.time).getTime();
+    if(dt<=now){
+      new Notification('Vidéo à publier', {body: `${v.product} — ${v.account||'compte non précisé'}`});
+      v.notified = true; changed=true;
+    }
+  });
+  if(changed){ persist(); renderVideos(); renderShops(); }
+}
+setInterval(checkVideoAlerts, 30000);
+
+/* ---------- video color helper ---------- */
+function videoColor(v){
+  if(v.status==='pub') return 'green';
+  if(v.date){
+    const dt = new Date(v.date+'T'+(v.time||'23:59')).getTime();
+    if(dt < Date.now()) return 'red';
+  }
+  if(v.status==='script') return 'orange';
+  return 'blue';
+}
+const colorHex = {orange:'var(--accent)', blue:'var(--blue)', green:'var(--success)', red:'var(--danger)'};
+const colorBadgeClass = {orange:'b-orange', blue:'b-blue', green:'b-green', red:'b-red'};
+
+/* ---------- BOUTIQUES ---------- */
+function shopProductOptions(selectedId){
+  return '<option value="">— aucun —</option>' +
+    state.products.map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${esc(p.name)}</option>`).join('') +
+    `<option value="__other__" ${selectedId==='__other__'?'selected':''}>Autre (préciser)</option>`;
+}
+function refreshShopProductSelect(){
+  const sel = document.getElementById('s-product');
+  const current = sel.value;
+  sel.innerHTML = shopProductOptions('');
+  sel.value = current;
+}
+function toggleShopProductOther(selectId, inputId){
+  const v = document.getElementById(selectId).value;
+  document.getElementById(inputId).classList.toggle('hidden', v!=='__other__');
+}
+function addShop(){
+  const name=document.getElementById('s-name').value.trim();
+  const market=document.getElementById('s-market').value;
+  const prodSel=document.getElementById('s-product').value;
+  const prodOther=document.getElementById('s-product-other').value.trim();
+  const price=parseFloat(document.getElementById('s-price').value)||0;
+  const cost=parseFloat(document.getElementById('s-cost').value)||0;
+  if(!name){ alert('Indique au moins le nom de la boutique.'); return; }
+  let productId='', productOther='';
+  if(prodSel==='__other__'){ productOther=prodOther; }
+  else if(prodSel){ productId=prodSel; }
+  state.shops.unshift({id:uid(), name, market, productId, productOther, price, cost, units:0, otherCosts:0});
+  persist();
+  ['s-name','s-price','s-cost','s-product-other'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('s-product').value='';
+  toggleShopProductOther('s-product','s-product-other');
+  renderShops(); renderAccounts(); renderVideoShopSelect();
+}
+function deleteShop(id){
+  state.shops = state.shops.filter(x=>x.id!==id);
+  persist(); renderShops(); renderAccounts(); renderVideoShopSelect();
+}
+function updateShopField(id, field, value){
+  const s = state.shops.find(x=>x.id===id);
+  if(!s) return;
+  s[field] = parseFloat(value)||0;
+  persist(); renderShops();
+}
+function startEditShop(id){ editingShopId=id; renderShops(); }
+function cancelEditShop(){ editingShopId=null; renderShops(); }
+function saveEditShop(id){
+  const s = state.shops.find(x=>x.id===id);
+  if(!s) return;
+  const name = document.getElementById('es-name-'+id).value.trim();
+  if(!name){ alert('Le nom ne peut pas être vide.'); return; }
+  const market = document.getElementById('es-market-'+id).value;
+  const prodSel = document.getElementById('es-product-'+id).value;
+  const prodOther = document.getElementById('es-product-other-'+id).value.trim();
+  const price = parseFloat(document.getElementById('es-price-'+id).value)||0;
+  const cost = parseFloat(document.getElementById('es-cost-'+id).value)||0;
+  s.name=name; s.market=market; s.price=price; s.cost=cost;
+  if(prodSel==='__other__'){ s.productId=''; s.productOther=prodOther; }
+  else if(prodSel){ s.productId=prodSel; s.productOther=''; }
+  else { s.productId=''; s.productOther=''; }
+  persist(); editingShopId=null; renderShops(); renderVideoShopSelect(); renderAccounts();
+}
+function shopStats(s){
+  const ca = s.price * s.units;
+  const coutTotal = s.cost * s.units + (s.otherCosts||0);
+  return {ca, coutTotal, gain: ca - coutTotal};
+}
+function shopProductInfo(s){
+  if(s.productId){
+    const p = state.products.find(x=>x.id===s.productId);
+    if(p) return `${esc(p.name)}${p.supplier? ' · '+esc(p.supplier):''}${p.deliveryTime? ' · livraison '+esc(p.deliveryTime):''}${p.moq? ' · MOQ '+p.moq:''}`;
+  }
+  if(s.productOther) return esc(s.productOther);
+  return 'Aucun produit lié';
+}
+function shopVideoBadges(shopId){
+  const vids = state.videos.filter(v=>v.shopId===shopId);
+  if(vids.length===0) return '';
+  const counts = {orange:0, blue:0, green:0, red:0};
+  vids.forEach(v=>counts[videoColor(v)]++);
+  return Object.keys(counts).filter(c=>counts[c]>0).map(c=>
+    `<span class="vdot"><span class="sq" style="background:${colorHex[c]}"></span>${counts[c]}</span>`
+  ).join('');
+}
+function renderShops(){
+  let totalCA=0, totalGain=0;
+  state.shops.forEach(s=>{ const st=shopStats(s); totalCA+=st.ca; totalGain+=st.gain; });
+  document.getElementById('s-totals').innerHTML = `
+    <div class="metric"><div class="label">CA total</div><div class="val">${euroSpan(totalCA)}</div></div>
+    <div class="metric"><div class="label">Gain total</div><div class="val">${euroSpan(totalGain)}</div></div>
+    <div class="metric"><div class="label">Boutiques</div><div class="val">${state.shops.length}</div></div>
+    <div class="metric"><div class="label">Marge moyenne</div><div class="val">${totalCA>0? Math.round(totalGain/totalCA*100):0}%</div></div>
+  `;
+  refreshShopProductSelect();
+  const list = document.getElementById('s-list');
+  if(state.shops.length===0){ list.innerHTML='<div class="empty">Aucune boutique. Ajoute ta première boutique ci-dessus.</div>'; return; }
+  list.innerHTML = state.shops.map(s=>{
+    if(editingShopId===s.id){
+      return `
+      <div class="item">
+        <div class="editbox">
+          <label>Nom</label><input id="es-name-${s.id}" value="${esc(s.name)}">
+          <div class="row">
+            <div><label>Marché</label><select id="es-market-${s.id}"><option value="US" ${s.market==='US'?'selected':''}>US</option><option value="FR" ${s.market==='FR'?'selected':''}>FR</option></select></div>
+            <div><label>Produit</label><select id="es-product-${s.id}" onchange="toggleShopProductOther('es-product-${s.id}','es-product-other-${s.id}')">${shopProductOptions(s.productId || (s.productOther?'__other__':''))}</select></div>
+          </div>
+          <input id="es-product-other-${s.id}" value="${esc(s.productOther||'')}" placeholder="Nom du produit" class="${(s.productId || !s.productOther)?'hidden':''}" style="margin-top:8px">
+          <div class="row" style="margin-top:8px">
+            <div><label>Prix de vente (€)</label><input id="es-price-${s.id}" type="number" step="0.01" value="${s.price}"></div>
+            <div><label>Coût produit (€)</label><input id="es-cost-${s.id}" type="number" step="0.01" value="${s.cost}"></div>
+          </div>
+          <div class="btnrow">
+            <button class="btn primary" onclick="saveEditShop('${s.id}')">Enregistrer</button>
+            <button class="btn" onclick="cancelEditShop()">Annuler</button>
+          </div>
+        </div>
+      </div>`;
+    }
+    const st = shopStats(s);
+    const accCount = state.accounts.filter(a=>a.shopId===s.id).length;
+    const vidBadges = shopVideoBadges(s.id);
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(s.name)}</div>
+          <div class="item-sub">${s.market} · ${shopProductInfo(s)}</div>
+          <div class="item-sub">${accCount} compte(s) lié(s)</div>
+        </div>
+        <span class="badge">${euroSpan(st.gain)}</span>
+      </div>
+      ${vidBadges? `<div style="margin-top:8px">${vidBadges}</div>`:''}
+      <div class="row" style="margin-top:10px">
+        <div><label>Ventes cumulées (unités)</label><input type="number" value="${s.units}" onchange="updateShopField('${s.id}','units',this.value)"></div>
+        <div><label>Autres frais cumulés (€)</label><input type="number" step="0.01" value="${s.otherCosts||0}" onchange="updateShopField('${s.id}','otherCosts',this.value)"></div>
+      </div>
+      <div class="item-sub" style="margin-top:8px">Prix ${euro(s.price)} · Coût ${euro(s.cost)} · CA ${euroSpan(st.ca)} · Coûts totaux ${euroSpan(-st.coutTotal)}</div>
+      <div class="item-actions">
+        <button class="btn small" onclick="startEditShop('${s.id}')">Modifier</button>
+        <button class="btn small danger" onclick="deleteShop('${s.id}')">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- PRODUITS ---------- */
+const prodStatusLabels = {neutre:'Neutre', alancer:'À lancer', essaye:'Essayé', lance:'Lancé'};
+const prodStatusClass = {neutre:'b-gray', alancer:'b-orange', essaye:'b-blue', lance:'b-green'};
+const prodStatusOrder = ['neutre','alancer','essaye','lance'];
+function productStatusOptions(selected){
+  return prodStatusOrder.map(k=>`<option value="${k}" ${k===selected?'selected':''}>${prodStatusLabels[k]}</option>`).join('');
+}
+function addProduct(){
+  const name=document.getElementById('p-name').value.trim();
+  const market=document.getElementById('p-market').value;
+  const supplier=document.getElementById('p-supplier').value.trim();
+  const status=document.getElementById('p-status').value;
+  const deliveryTime=document.getElementById('p-delivery').value.trim();
+  const moq=document.getElementById('p-moq').value;
+  const notes=document.getElementById('p-notes').value.trim();
+  if(!name){ alert('Indique le nom du produit.'); return; }
+  state.products.unshift({id:uid(), name, market, supplier, status, deliveryTime, moq: moq? parseInt(moq):null, notes});
+  persist();
+  ['p-name','p-supplier','p-delivery','p-moq','p-notes'].forEach(id=>document.getElementById(id).value='');
+  renderProducts(); renderShops();
+}
+function cycleProductStatus(id){
+  const p = state.products.find(x=>x.id===id);
+  if(!p) return;
+  p.status = prodStatusOrder[(prodStatusOrder.indexOf(p.status)+1)%prodStatusOrder.length];
+  persist(); renderProducts();
+}
+function deleteProduct(id){
+  state.products = state.products.filter(x=>x.id!==id);
+  persist(); renderProducts(); renderShops();
+}
+function startEditProduct(id){ editingProductId=id; renderProducts(); }
+function cancelEditProduct(){ editingProductId=null; renderProducts(); }
+function saveEditProduct(id){
+  const p = state.products.find(x=>x.id===id);
+  if(!p) return;
+  const name = document.getElementById('ep-name-'+id).value.trim();
+  if(!name){ alert('Le nom ne peut pas être vide.'); return; }
+  p.name = name;
+  p.market = document.getElementById('ep-market-'+id).value;
+  p.supplier = document.getElementById('ep-supplier-'+id).value.trim();
+  p.status = document.getElementById('ep-status-'+id).value;
+  p.deliveryTime = document.getElementById('ep-delivery-'+id).value.trim();
+  const moq = document.getElementById('ep-moq-'+id).value;
+  p.moq = moq? parseInt(moq):null;
+  p.notes = document.getElementById('ep-notes-'+id).value.trim();
+  persist(); editingProductId=null; renderProducts(); renderShops();
+}
+function setProductFilter(f){ productFilter=f; renderProducts(); }
+function renderProducts(){
+  const filters = document.getElementById('p-filters');
+  filters.innerHTML = ['all',...prodStatusOrder].map(f=>{
+    const label = f==='all'?'Tous':prodStatusLabels[f];
+    return `<button class="chip ${productFilter===f?'active':''}" onclick="setProductFilter('${f}')">${label}</button>`;
+  }).join('');
+  const list = document.getElementById('p-list');
+  const items = state.products.filter(p=>productFilter==='all'||p.status===productFilter);
+  if(items.length===0){ list.innerHTML='<div class="empty">Aucun produit pour ce filtre.</div>'; return; }
+  list.innerHTML = items.map(p=>{
+    if(editingProductId===p.id){
+      return `
+      <div class="item">
+        <div class="editbox">
+          <label>Nom</label><input id="ep-name-${p.id}" value="${esc(p.name)}">
+          <div class="row">
+            <div><label>Marché</label><select id="ep-market-${p.id}"><option value="US" ${p.market==='US'?'selected':''}>US</option><option value="FR" ${p.market==='FR'?'selected':''}>FR</option><option value="US/FR" ${p.market==='US/FR'?'selected':''}>US + FR</option></select></div>
+            <div><label>Statut</label><select id="ep-status-${p.id}">${productStatusOptions(p.status)}</select></div>
+          </div>
+          <label>Fournisseur</label><input id="ep-supplier-${p.id}" value="${esc(p.supplier||'')}">
+          <div class="row">
+            <div><label>Délai de livraison</label><input id="ep-delivery-${p.id}" value="${esc(p.deliveryTime||'')}"></div>
+            <div><label>MOQ</label><input id="ep-moq-${p.id}" type="number" value="${p.moq||''}"></div>
+          </div>
+          <label>Notes</label><textarea id="ep-notes-${p.id}" rows="2">${esc(p.notes||'')}</textarea>
+          <div class="btnrow">
+            <button class="btn primary" onclick="saveEditProduct('${p.id}')">Enregistrer</button>
+            <button class="btn" onclick="cancelEditProduct()">Annuler</button>
+          </div>
+        </div>
+      </div>`;
+    }
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(p.name)}</div>
+          <div class="item-sub">${p.market}${p.supplier? ' · '+esc(p.supplier):''}</div>
+          <div class="item-sub">${p.deliveryTime? 'Livraison: '+esc(p.deliveryTime):'Livraison: non précisée'} · ${p.moq? 'MOQ: '+p.moq:'MOQ: non précisé'}</div>
+          ${p.notes? `<div class="item-sub">${esc(p.notes)}</div>`:''}
+        </div>
+        <span class="badge ${prodStatusClass[p.status]}">${prodStatusLabels[p.status]}</span>
+      </div>
+      <div class="item-actions">
+        <button class="btn small" onclick="cycleProductStatus('${p.id}')">Statut suivant</button>
+        <button class="btn small" onclick="startEditProduct('${p.id}')">Modifier</button>
+        <button class="btn small danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- VIDEOS ---------- */
+const statusLabels = {script:'À scripter', video:'Vidéo IA faite', trad:'Traduite', prog:'Programmée', pub:'Publiée'};
+function renderVideoShopSelect(){
+  const sel = document.getElementById('v-shop');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— aucune —</option>' + state.shops.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  sel.value = current;
+}
+function addVideo(){
+  const market=document.getElementById('v-market').value;
+  const shopId=document.getElementById('v-shop').value;
+  const account=document.getElementById('v-account').value.trim();
+  const product=document.getElementById('v-product').value.trim();
+  const date=document.getElementById('v-date').value;
+  const time=document.getElementById('v-time').value;
+  const status=document.getElementById('v-status').value;
+  if(!account || !product){ alert('Renseigne au moins le compte et le produit.'); return; }
+  state.videos.unshift({id:uid(), market, shopId, account, product, date, time, status, notified:false});
+  persist();
+  ['v-account','v-product','v-date','v-time'].forEach(id=>document.getElementById(id).value='');
+  renderVideos(); renderCalendar(); renderShops();
+}
+function cycleStatus(id){
+  const order=['script','video','trad','prog','pub'];
+  const v = state.videos.find(x=>x.id===id);
+  if(!v) return;
+  v.status = order[(order.indexOf(v.status)+1)%order.length];
+  if(v.status!=='pub') v.notified=false;
+  persist(); renderVideos(); renderCalendar(); renderShops();
+}
+function deleteVideo(id){
+  state.videos = state.videos.filter(x=>x.id!==id);
+  persist(); renderVideos(); renderCalendar(); renderShops();
+}
+function setVideoFilter(f){ videoFilter=f; renderVideos(); }
+function renderVideos(){
+  renderVideoShopSelect();
+  const accounts = [...new Set(state.videos.map(v=>v.account))];
+  const filters = document.getElementById('v-filters');
+  filters.innerHTML = `<button class="chip ${videoFilter==='all'?'active':''}" onclick="setVideoFilter('all')">Tous</button>` +
+    accounts.map(a=>`<button class="chip ${videoFilter===a?'active':''}" onclick="setVideoFilter('${esc(a).replace(/'/g,"\\'")}')">${esc(a)}</button>`).join('');
+  const list = document.getElementById('v-list');
+  const items = state.videos.filter(v=>videoFilter==='all'||v.account===videoFilter)
+    .sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  if(items.length===0){ list.innerHTML='<div class="empty">Aucune vidéo pour le moment.</div>'; return; }
+  list.innerHTML = items.map(v=>{
+    const color = videoColor(v);
+    const label = color==='red' ? 'En retard' : statusLabels[v.status];
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(v.product)}</div>
+          <div class="item-sub">${esc(v.account)} · ${v.market}${v.date? ' · '+formatDate(v.date):''}${v.time? ' '+v.time:''}</div>
+        </div>
+        <span class="badge ${colorBadgeClass[color]}">${label}</span>
+      </div>
+      <div class="item-actions">
+        <button class="btn small" onclick="cycleStatus('${v.id}')">Statut suivant</button>
+        <button class="btn small danger" onclick="deleteVideo('${v.id}')">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- CALENDAR ---------- */
+function getWeekDates(offset){
+  const now = new Date();
+  const day = (now.getDay()+6)%7;
+  const monday = new Date(now); monday.setDate(now.getDate()-day+offset*7);
+  return Array.from({length:7},(_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
+}
+function shiftWeek(d){ weekOffset+=d; renderCalendar(); }
+function renderCalendar(){
+  const dates = getWeekDates(weekOffset);
+  const dayNames=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  document.getElementById('cal-label').textContent = `${dates[0].toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${dates[6].toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}`;
+  document.getElementById('calgrid').innerHTML = dates.map((d,i)=>{
+    const iso = d.toISOString().slice(0,10);
+    const dayVideos = state.videos.filter(v=>v.date===iso);
+    return `<div class="calday"><div class="d">${dayNames[i]} ${d.getDate()}</div>${dayVideos.map(v=>`<div class="caldot" title="${esc(v.account)} — ${esc(v.product)}">${v.time? v.time+' ':''}${esc(v.product)}</div>`).join('')}</div>`;
+  }).join('');
+}
+
+/* ---------- ACCOUNTS ---------- */
+function refreshShopSelect(){
+  const sel = document.getElementById('a-shop');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— sélectionner une boutique —</option>' + state.shops.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  sel.value = current;
+}
+function addAccount(){
+  const shopId=document.getElementById('a-shop').value;
+  const platform=document.getElementById('a-platform').value;
+  const email=document.getElementById('a-email').value.trim();
+  const username=document.getElementById('a-username').value.trim();
+  if(!shopId){ alert("Sélectionne d'abord la boutique concernée."); return; }
+  state.accounts.unshift({id:uid(), shopId, platform, email, username});
+  persist();
+  ['a-email','a-username'].forEach(id=>document.getElementById(id).value='');
+  renderAccounts(); renderShops();
+}
+function deleteAccount(id){
+  state.accounts = state.accounts.filter(x=>x.id!==id);
+  persist(); renderAccounts(); renderShops();
+}
+function openNotes(){ window.location.href = 'mobilenotes://'; }
+function renderAccounts(){
+  refreshShopSelect();
+  const list = document.getElementById('a-list');
+  if(state.accounts.length===0){ list.innerHTML='<div class="empty">Aucun compte enregistré.</div>'; return; }
+  list.innerHTML = state.accounts.map(a=>{
+    const shop = state.shops.find(s=>s.id===a.shopId);
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${shop? esc(shop.name) : 'Boutique supprimée'}</div>
+          <div class="item-sub">${a.platform}${a.username? ' · @'+esc(a.username):''}${a.email? ' · '+esc(a.email):''}</div>
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="btn small" onclick="openNotes()">Ouvrir l'app Notes</button>
+        <button class="btn small danger" onclick="deleteAccount('${a.id}')">Supprimer</button>
+      </div>
+      <div class="item-sub" style="margin-top:6px">iPhone/Safari uniquement — retrouve le mot de passe toi-même dedans.</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- FINANCE ---------- */
+function saveBudgets(){
+  state.finance.globalBudget = parseFloat(document.getElementById('f-globalbudget').value)||0;
+  state.finance.monthlyBudget = parseFloat(document.getElementById('f-monthlybudget').value)||0;
+  persist(); renderFinance();
+}
+function addExpense(){
+  const name=document.getElementById('f-name').value.trim();
+  const amount=parseFloat(document.getElementById('f-amount').value);
+  const type=document.getElementById('f-type').value;
+  if(!name || isNaN(amount)){ alert('Renseigne un nom et un montant.'); return; }
+  state.finance.expenses.unshift({id:uid(), name, amount, type});
+  persist();
+  document.getElementById('f-name').value=''; document.getElementById('f-amount').value='';
+  renderFinance();
+}
+function deleteExpense(id){
+  state.finance.expenses = state.finance.expenses.filter(x=>x.id!==id);
+  persist(); renderFinance();
+}
+function renderFinance(){
+  document.getElementById('f-globalbudget').value = state.finance.globalBudget || '';
+  document.getElementById('f-monthlybudget').value = state.finance.monthlyBudget || '';
+  const oneTime = state.finance.expenses.filter(e=>e.type==='once').reduce((s,e)=>s+e.amount,0);
+  const monthly = state.finance.expenses.filter(e=>e.type==='monthly').reduce((s,e)=>s+e.amount,0);
+  document.getElementById('f-onetime-total').innerHTML = euroSpan(-oneTime);
+  document.getElementById('f-monthly-total').innerHTML = euroSpan(-monthly);
+  const globalRest = (state.finance.globalBudget||0) - oneTime;
+  const monthlyRest = (state.finance.monthlyBudget||0) - monthly;
+  document.getElementById('f-global-rest').innerHTML = euroSpan(globalRest);
+  document.getElementById('f-monthly-rest').innerHTML = euroSpan(monthlyRest);
+  const list = document.getElementById('f-list');
+  if(state.finance.expenses.length===0){ list.innerHTML='<div class="empty">Aucune dépense enregistrée.</div>'; return; }
+  list.innerHTML = state.finance.expenses.map(e=>`
+    <div class="item">
+      <div class="item-top">
+        <div><div class="item-title">${esc(e.name)}</div><div class="item-sub">${e.type==='monthly'?'Abonnement mensuel':'Dépense ponctuelle'}</div></div>
+        <span class="badge">${euroSpan(-e.amount)}</span>
+      </div>
+      <div class="item-actions"><button class="btn small danger" onclick="deleteExpense('${e.id}')">Supprimer</button></div>
+    </div>
+  `).join('');
+}
+
+/* ---------- WORK ---------- */
+function workElapsedSeconds(){
+  let s = state.work.accumulated;
+  if(state.work.running && state.work.startTs) s += (Date.now()-state.work.startTs)/1000;
+  return s;
+}
+function fmtHMS(sec){
+  sec = Math.floor(sec);
+  const h=String(Math.floor(sec/3600)).padStart(2,'0');
+  const m=String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s=String(sec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+function fmtHM(sec){ const h=Math.floor(sec/3600), m=Math.round((sec%3600)/60); return `${h}h${String(m).padStart(2,'0')}`; }
+function workStart(){
+  if(state.work.running) return;
+  state.work.running=true; state.work.startTs=Date.now();
+  persist(); startWorkTicker(); renderWork();
+}
+function workPause(){
+  if(!state.work.running) return;
+  state.work.accumulated += (Date.now()-state.work.startTs)/1000;
+  state.work.running=false; state.work.startTs=null;
+  persist(); stopWorkTicker(); renderWork();
+}
+function workResume(){
+  if(state.work.running) return;
+  state.work.running=true; state.work.startTs=Date.now();
+  persist(); startWorkTicker(); renderWork();
+}
+function workStop(){
+  if(state.work.running){
+    state.work.accumulated += (Date.now()-state.work.startTs)/1000;
+    state.work.running=false; state.work.startTs=null;
+  }
+  const seconds = state.work.accumulated;
+  if(seconds>0){
+    const today = new Date().toISOString().slice(0,10);
+    let entry = state.work.history.find(h=>h.date===today);
+    if(entry) entry.seconds += seconds; else state.work.history.unshift({date:today, seconds});
+  }
+  state.work.accumulated=0;
+  persist(); stopWorkTicker(); renderWork();
+}
+function workDiscard(){
+  if(!confirm('Effacer la session en cours sans l\'enregistrer ?')) return;
+  state.work.running=false; state.work.startTs=null; state.work.accumulated=0;
+  persist(); stopWorkTicker(); renderWork();
+}
+function deleteWorkEntry(date){
+  if(!confirm('Supprimer ce temps enregistré ?')) return;
+  state.work.history = state.work.history.filter(h=>h.date!==date);
+  persist(); renderWork();
+}
+function startWorkTicker(){
+  if(workTickHandle) return;
+  workTickHandle = setInterval(()=>{ document.getElementById('w-display').textContent = fmtHMS(workElapsedSeconds()); }, 1000);
+}
+function stopWorkTicker(){ if(workTickHandle){ clearInterval(workTickHandle); workTickHandle=null; } }
+function renderWork(){
+  document.getElementById('w-display').textContent = fmtHMS(workElapsedSeconds());
+  const controls = document.getElementById('w-controls');
+  if(state.work.running){
+    controls.innerHTML = `
+      <button class="btn" onclick="workPause()">Pause</button>
+      <button class="btn danger" onclick="workStop()">Terminer</button>`;
+  } else if(state.work.accumulated>0){
+    controls.innerHTML = `
+      <button class="btn primary" onclick="workResume()">Reprendre</button>
+      <button class="btn danger" onclick="workStop()">Terminer</button>
+      <button class="btn" onclick="workDiscard()">Effacer la session</button>`;
+  } else {
+    controls.innerHTML = `<button class="btn primary" onclick="workStart()">Démarrer</button>`;
+  }
+  const list = document.getElementById('w-history');
+  if(state.work.history.length===0){ list.innerHTML='<div class="empty">Aucune session enregistrée.</div>'; return; }
+  list.innerHTML = state.work.history.map(h=>`
+    <div class="item">
+      <div class="item-top">
+        <div class="item-title">${new Date(h.date+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'})}</div>
+        <span class="badge b-blue">${fmtHM(h.seconds)}</span>
+      </div>
+      <div class="item-actions"><button class="btn small danger" onclick="deleteWorkEntry('${h.date}')">Supprimer</button></div>
+    </div>
+  `).join('');
+}
+
+/* ---------- CLIPS ---------- */
+const clipStatusLabels = {idee:'À faire', monte:'Montée', programme:'Programmée', publie:'Publiée'};
+let editingClipId = null;
+function clipColor(c){
+  if(c.status==='publie') return 'green';
+  if(c.date){
+    const dt = new Date(c.date+'T'+(c.time||'23:59')).getTime();
+    if(dt < Date.now()) return 'red';
+  }
+  if(c.status==='idee') return 'orange';
+  return 'blue';
+}
+function clipStatusOptionsHtml(selected){
+  return Object.keys(clipStatusLabels).map(k=>`<option value="${k}" ${k===selected?'selected':''}>${clipStatusLabels[k]}</option>`).join('');
+}
+function addClip(){
+  const title=document.getElementById('c-title').value.trim();
+  const source=document.getElementById('c-source').value.trim();
+  const part=document.getElementById('c-part').value.trim();
+  const date=document.getElementById('c-date').value;
+  const time=document.getElementById('c-time').value;
+  const status=document.getElementById('c-status').value;
+  if(!title){ alert('Indique au moins un titre / description du clip.'); return; }
+  state.clips.unshift({id:uid(), title, source, part, date, time, status});
+  persist();
+  ['c-title','c-source','c-part','c-date','c-time'].forEach(id=>document.getElementById(id).value='');
+  renderClips();
+}
+function cycleClipStatus(id){
+  const order=['idee','monte','programme','publie'];
+  const c = state.clips.find(x=>x.id===id);
+  if(!c) return;
+  c.status = order[(order.indexOf(c.status)+1)%order.length];
+  persist(); renderClips();
+}
+function deleteClip(id){ state.clips = state.clips.filter(x=>x.id!==id); persist(); renderClips(); }
+function startEditClip(id){ editingClipId=id; renderClips(); }
+function cancelEditClip(){ editingClipId=null; renderClips(); }
+function saveEditClip(id){
+  const c = state.clips.find(x=>x.id===id);
+  if(!c) return;
+  const title = document.getElementById('ec-title-'+id).value.trim();
+  if(!title){ alert('Le titre ne peut pas être vide.'); return; }
+  c.title=title;
+  c.source=document.getElementById('ec-source-'+id).value.trim();
+  c.part=document.getElementById('ec-part-'+id).value.trim();
+  c.date=document.getElementById('ec-date-'+id).value;
+  c.time=document.getElementById('ec-time-'+id).value;
+  c.status=document.getElementById('ec-status-'+id).value;
+  persist(); editingClipId=null; renderClips();
+}
+function renderClips(){
+  const list=document.getElementById('c-list');
+  const items = state.clips.slice().sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  if(items.length===0){ list.innerHTML='<div class="empty">Aucun clip pour le moment.</div>'; return; }
+  list.innerHTML = items.map(c=>{
+    if(editingClipId===c.id){
+      return `
+      <div class="item">
+        <div class="editbox">
+          <label>Titre</label><input id="ec-title-${c.id}" value="${esc(c.title)}">
+          <div class="row">
+            <div><label>Source</label><input id="ec-source-${c.id}" value="${esc(c.source||'')}"></div>
+            <div><label>Partie</label><input id="ec-part-${c.id}" value="${esc(c.part||'')}"></div>
+          </div>
+          <div class="row">
+            <div><label>Date</label><input id="ec-date-${c.id}" type="date" value="${c.date||''}"></div>
+            <div><label>Heure</label><input id="ec-time-${c.id}" type="time" value="${c.time||''}"></div>
+          </div>
+          <label>Statut</label><select id="ec-status-${c.id}">${clipStatusOptionsHtml(c.status)}</select>
+          <div class="btnrow">
+            <button class="btn primary" onclick="saveEditClip('${c.id}')">Enregistrer</button>
+            <button class="btn" onclick="cancelEditClip()">Annuler</button>
+          </div>
+        </div>
+      </div>`;
+    }
+    const color = clipColor(c);
+    const label = color==='red' ? 'En retard' : clipStatusLabels[c.status];
+    return `
+    <div class="item">
+      <div class="item-top">
+        <div>
+          <div class="item-title">${esc(c.title)}</div>
+          <div class="item-sub">${c.part? 'Partie '+esc(c.part):''}${c.source? (c.part?' · ':'')+'source: '+esc(c.source):''}</div>
+          <div class="item-sub">${c.date? formatDate(c.date):''}${c.time? ' '+c.time:''}</div>
+        </div>
+        <span class="badge ${colorBadgeClass[color]}">${label}</span>
+      </div>
+      <div class="item-actions">
+        <button class="btn small" onclick="cycleClipStatus('${c.id}')">Statut suivant</button>
+        <button class="btn small" onclick="startEditClip('${c.id}')">Modifier</button>
+        <button class="btn small danger" onclick="deleteClip('${c.id}')">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- EXPORT / IMPORT ---------- */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'dropship-data-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      state = Object.assign({shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[]}, imported);
+      persist();
+      renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips();
+      alert('Import réussi.');
+    }catch(e){ alert('Fichier invalide.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ---------- BOOTSTRAP ---------- */
+try{
+  firebase.auth().onAuthStateChanged(function(user){
+    authUser = user;
+    maybeProceed();
+  });
+}catch(e){
+  firebaseAvailable = false;
+  console.error('Firebase auth listener failed', e);
+}
+if(sessionStorage.getItem('app_unlocked')==='true'){
+  pinPassed = true;
+}
+maybeProceed();
+</script>
+</body>
+</html>
