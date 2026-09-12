@@ -277,7 +277,12 @@ h2.sectiontitle:first-child{margin-top:0;}
         <div><label>Montant (€)</label><input id="f-amount" type="number" step="0.01" placeholder="ex: 20"></div>
       </div>
       <label>Type</label>
-      <select id="f-type"><option value="once">Ponctuel (budget global)</option><option value="monthly">Abonnement mensuel (budget mensuel)</option></select>
+      <select id="f-type" onchange="document.getElementById('f-renewal-wrap').classList.toggle('hidden', this.value!=='monthly')"><option value="once">Ponctuel (budget global)</option><option value="monthly">Abonnement mensuel (budget mensuel)</option></select>
+      <div id="f-renewal-wrap" class="hidden" style="margin-top:8px">
+        <label>Date de renouvellement</label>
+        <input id="f-renewal" type="date">
+        <div class="item-sub" style="margin-top:4px">Rappel automatique 2 jours puis 1 jour avant, pour annuler si besoin.</div>
+      </div>
       <div class="btnrow"><button class="btn primary" onclick="addExpense()">Ajouter la dépense</button></div>
     </div>
     <div id="f-list"></div>
@@ -854,7 +859,8 @@ function renderCalendar(){
   document.getElementById('calgrid').innerHTML = dates.map((d,i)=>{
     const iso = d.toISOString().slice(0,10);
     const dayVideos = state.videos.filter(v=>v.date===iso);
-    return `<div class="calday"><div class="d">${dayNames[i]} ${d.getDate()}</div>${dayVideos.map(v=>`<div class="caldot" title="${esc(v.account)} — ${esc(v.product)}">${v.time? v.time+' ':''}${esc(v.product)}</div>`).join('')}</div>`;
+    const daySubs = state.finance.expenses.filter(e=>e.type==='monthly' && e.renewalDate===iso);
+    return `<div class="calday"><div class="d">${dayNames[i]} ${d.getDate()}</div>${dayVideos.map(v=>`<div class="caldot" title="${esc(v.account)} — ${esc(v.product)}">${v.time? v.time+' ':''}${esc(v.product)}</div>`).join('')}${daySubs.map(e=>`<div class="caldot" style="background:var(--accent);color:var(--accent-text)" title="Renouvellement ${esc(e.name)}">Abo: ${esc(e.name)}</div>`).join('')}</div>`;
   }).join('');
 }
 
@@ -896,10 +902,10 @@ function renderAccounts(){
         </div>
       </div>
       <div class="item-actions">
-        <button class="btn small" onclick="openNotes()">Ouvrir l'app Notes</button>
+        <button class="btn small" onclick="openNotes()">Ouvrir Notes (iPhone)</button>
         <button class="btn small danger" onclick="deleteAccount('${a.id}')">Supprimer</button>
       </div>
-      <div class="item-sub" style="margin-top:6px">iPhone/Safari uniquement — retrouve le mot de passe toi-même dedans.</div>
+      <div class="item-sub" style="margin-top:6px">iPhone : ouvre directement l'app Notes. Sur PC : pas de raccourci possible depuis une page web — ouvre ton Bloc-notes toi-même.</div>
     </div>`;
   }).join('');
 }
@@ -914,15 +920,16 @@ function addExpense(){
   const name=document.getElementById('f-name').value.trim();
   const amount=parseFloat(document.getElementById('f-amount').value);
   const type=document.getElementById('f-type').value;
+  const renewalDate = type==='monthly' ? document.getElementById('f-renewal').value : '';
   if(!name || isNaN(amount)){ alert('Renseigne un nom et un montant.'); return; }
-  state.finance.expenses.unshift({id:uid(), name, amount, type});
+  state.finance.expenses.unshift({id:uid(), name, amount, type, renewalDate, notified2:false, notified1:false});
   persist();
-  document.getElementById('f-name').value=''; document.getElementById('f-amount').value='';
-  renderFinance();
+  document.getElementById('f-name').value=''; document.getElementById('f-amount').value=''; document.getElementById('f-renewal').value='';
+  renderFinance(); renderCalendar();
 }
 function deleteExpense(id){
   state.finance.expenses = state.finance.expenses.filter(x=>x.id!==id);
-  persist(); renderFinance();
+  persist(); renderFinance(); renderCalendar();
 }
 function renderFinance(){
   document.getElementById('f-globalbudget').value = state.finance.globalBudget || '';
@@ -940,13 +947,38 @@ function renderFinance(){
   list.innerHTML = state.finance.expenses.map(e=>`
     <div class="item">
       <div class="item-top">
-        <div><div class="item-title">${esc(e.name)}</div><div class="item-sub">${e.type==='monthly'?'Abonnement mensuel':'Dépense ponctuelle'}</div></div>
+        <div><div class="item-title">${esc(e.name)}</div><div class="item-sub">${e.type==='monthly'?'Abonnement mensuel':'Dépense ponctuelle'}${e.type==='monthly' && e.renewalDate? ' · renouvellement '+formatDate(e.renewalDate):''}</div></div>
         <span class="badge">${euroSpan(-e.amount)}</span>
       </div>
       <div class="item-actions"><button class="btn small danger" onclick="deleteExpense('${e.id}')">Supprimer</button></div>
     </div>
   `).join('');
 }
+function checkSubscriptionAlerts(){
+  const todayMid = new Date(); todayMid.setHours(0,0,0,0);
+  let changed = false;
+  state.finance.expenses.forEach(e=>{
+    if(e.type!=='monthly' || !e.renewalDate) return;
+    const renewalMid = new Date(e.renewalDate+'T00:00:00');
+    const daysLeft = Math.round((renewalMid - todayMid)/86400000);
+    const notifOk = ('Notification' in window) && Notification.permission==='granted';
+    if(daysLeft===2 && !e.notified2){
+      if(notifOk) new Notification('Abonnement bientôt renouvelé', {body: `${e.name} se renouvelle dans 2 jours — annule si tu ne veux pas.`});
+      e.notified2=true; changed=true;
+    }
+    if(daysLeft===1 && !e.notified1){
+      if(notifOk) new Notification('Abonnement renouvelé demain', {body: `${e.name} se renouvelle demain — dernière chance d'annuler.`});
+      e.notified1=true; changed=true;
+    }
+    if(daysLeft<0){
+      const next = new Date(renewalMid); next.setMonth(next.getMonth()+1);
+      e.renewalDate = next.toISOString().slice(0,10);
+      e.notified1=false; e.notified2=false; changed=true;
+    }
+  });
+  if(changed){ persist(); renderFinance(); }
+}
+setInterval(checkSubscriptionAlerts, 60000);
 
 /* ---------- WORK ---------- */
 function workElapsedSeconds(){
