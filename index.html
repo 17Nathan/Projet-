@@ -291,6 +291,15 @@ h2.sectiontitle:first-child{margin-top:0;}
     </div>
     <h2 class="sectiontitle">Historique</h2>
     <div id="w-history"></div>
+
+    <h2 class="sectiontitle">À faire plus tard</h2>
+    <div class="card">
+      <div class="row">
+        <input id="t-text" placeholder="ex: Créer les mails de relance panier abandonné" style="flex:3">
+        <button class="btn primary" style="flex:1;min-width:90px" onclick="addTodo()">Ajouter</button>
+      </div>
+    </div>
+    <div id="t-list"></div>
   </section>
 
   <!-- CLIPS -->
@@ -420,7 +429,8 @@ let state = {
   shops: [], products: [], videos: [], accounts: [],
   finance: { expenses: [], globalBudget: 0, monthlyBudget: 0 },
   work: { running:false, startTs:null, accumulated:0, history:[] },
-  clips: []
+  clips: [],
+  todos: []
 };
 let weekOffset = 0;
 let videoFilter = 'all';
@@ -436,7 +446,7 @@ function initFirebaseApp(){
   const uid = firebase.auth().currentUser.uid;
   userDocRef = db.collection('users').doc(uid);
   userDocRef.onSnapshot(function(doc){
-    const defaults = {shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[]};
+    const defaults = {shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[],todos:[]};
     if(doc.exists){
       const data = doc.data();
       state = Object.assign(defaults, data);
@@ -444,7 +454,7 @@ function initFirebaseApp(){
     } else {
       state = defaults;
     }
-    renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips();
+    renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips(); renderTodos();
     if(state.work.running) startWorkTicker();
     updateBellIcon();
   }, function(err){ console.error('Firestore read error', err); });
@@ -1025,6 +1035,42 @@ function renderWork(){
   `).join('');
 }
 
+/* ---------- TODOS (Work) ---------- */
+function addTodo(){
+  const text = document.getElementById('t-text').value.trim();
+  if(!text){ return; }
+  state.todos.unshift({id:uid(), text, done:false});
+  persist();
+  document.getElementById('t-text').value='';
+  renderTodos();
+}
+function toggleTodo(id){
+  const t = state.todos.find(x=>x.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  persist(); renderTodos();
+}
+function deleteTodo(id){
+  state.todos = state.todos.filter(x=>x.id!==id);
+  persist(); renderTodos();
+}
+function renderTodos(){
+  const list = document.getElementById('t-list');
+  if(!state.todos || state.todos.length===0){ list.innerHTML='<div class="empty">Rien à faire pour l\'instant.</div>'; return; }
+  const sorted = state.todos.slice().sort((a,b)=> (a.done===b.done)?0:(a.done?1:-1));
+  list.innerHTML = sorted.map(t=>`
+    <div class="item">
+      <div class="item-top">
+        <div style="display:flex;align-items:center;gap:10px;flex:1">
+          <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')" style="width:20px;height:20px;flex:0">
+          <div class="item-title" style="${t.done?'text-decoration:line-through;color:var(--text-3)':''}">${esc(t.text)}</div>
+        </div>
+        <button class="btn small danger" onclick="deleteTodo('${t.id}')">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+}
+
 /* ---------- CLIPS ---------- */
 const clipStatusLabels = {idee:'À faire', monte:'Montée', programme:'Programmée', publie:'Publiée'};
 let editingClipId = null;
@@ -1139,9 +1185,9 @@ function importData(event){
   reader.onload = ()=>{
     try{
       const imported = JSON.parse(reader.result);
-      state = Object.assign({shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[]}, imported);
+      state = Object.assign({shops:[],products:[],videos:[],accounts:[],finance:{expenses:[],globalBudget:0,monthlyBudget:0},work:{running:false,startTs:null,accumulated:0,history:[]},clips:[],todos:[]}, imported);
       persist();
-      renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips();
+      renderShops(); renderProducts(); renderVideos(); renderCalendar(); renderAccounts(); renderFinance(); renderWork(); renderClips(); renderTodos();
       alert('Import réussi.');
     }catch(e){ alert('Fichier invalide.'); }
   };
